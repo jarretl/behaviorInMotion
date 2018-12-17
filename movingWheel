@@ -1,0 +1,66 @@
+# CircuitPlaygroundExpress_AnalogIn
+# reads the analog voltage level from a 10k potentiometer
+# connected to GND, 3.3V, and pin A1
+# and prints the results to the REPL
+ 
+import time
+import board
+import pulseio
+
+from analogio import AnalogIn
+from adafruit_motor import servo
+from random import randint
+from adafruit_circuitplayground.express import cpx
+
+#-----------------------------------------------------------------------#
+
+"""pos = 0  # Starting center position of pupil
+increment = 2 * 3.14 / 10  # distance between pixels in radians
+MomentumH = 0  # horizontal component of pupil rotational inertia
+MomentumV = 0  # vertical component of pupil rotational inertia"""
+
+analogin = AnalogIn(board.A3) # Create an anolog reader
+ 
+pwm = pulseio.PWMOut(board.A1, duty_cycle=2 ** 15, frequency=50)# Create a PWMOut object on Pin A1.
+
+servo1 = servo.Servo(pwm, min_pulse=620, max_pulse=2320) # Create a servo object, servo1.
+
+timer = 0 # Set a timer variable
+ 
+def getVoltage(pin):  # helper
+    return (pin.value * 3.3) / 65536
+
+while True:
+    prox = analogin.value/65536
+    #t = time.monotonic()
+    if (prox > 0.4):
+        servo1.angle = 90
+        timer = timer + 1
+        print ("timer =", timer)
+        if (timer == 40):
+            servo1.angle = 0
+            time.sleep(.3)
+            servo1.angle = 180
+            time.sleep(.2)
+            servo1.angle = 0
+            time.sleep(.1)           
+            servo1.angle = 180
+            time.sleep(.1)
+            servo1.angle = 0
+            time.sleep(.2)
+            servo1.angle = 180
+            time.sleep(4)
+            servo1.angle = 90
+            time.sleep(5)
+            timer = 0
+        #print(prox)
+        
+    if (prox < 0.4):
+        servo1.angle = 150
+        timer = 0
+        #print(prox)
+        #print ("t =", t)
+        
+    #print("Analog Voltage: %f" % getVoltage(analogin))
+    time.sleep(0.1)
+    
